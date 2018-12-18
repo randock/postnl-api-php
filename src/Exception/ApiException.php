@@ -33,5 +33,40 @@ namespace ThirtyBees\PostNL\Exception;
  */
 class ApiException extends AbstractException
 {
+    /**
+     * @var array
+     */
+    private $errors;
 
+    /**
+     * ApiException constructor.
+     * @param null|string $message
+     * @param null|int $code
+     * @param array $errors
+     * @param null $previous
+     */
+    public function __construct($message = "", $code = 0, array $errors = null, $previous = null)
+    {
+        parent::__construct($message, $code, $previous);
+
+        $this->errors = $errors;
+    }
+
+    /**
+     * @return array
+     */
+    public function getErrors()
+    {
+        return $this->errors;
+    }
+
+    /**
+     * @param array $errors
+     * @return ApiException
+     */
+    public function setErrors(array $errors)
+    {
+        $this->errors = $errors;
+        return $this;
+    }
 }

@@ -46,6 +46,7 @@ use ThirtyBees\PostNL\Service\TimeframeService;
  *
  * @method ConfirmingResponseShipment setBarcode(string|null $barcode = null)
  * @method ConfirmingResponseShipment setWarnings(Warning[]|null $warnings = null)
+ * @method ConfirmingResponseShipment setErrors(array |null $warnings = null)
  */
 class ConfirmingResponseShipment extends AbstractEntity
 {
@@ -58,6 +59,7 @@ class ConfirmingResponseShipment extends AbstractEntity
         'Confirming'     => [
             'Barcode'  => ConfirmingService::DOMAIN_NAMESPACE,
             'Warnings' => ConfirmingService::DOMAIN_NAMESPACE,
+            'Errors'   => ConfirmingService::DOMAIN_NAMESPACE,
         ],
         'Labelling'      => [
             'Barcode'  => LabellingService::DOMAIN_NAMESPACE,
@@ -85,19 +87,40 @@ class ConfirmingResponseShipment extends AbstractEntity
     protected $Barcode;
     /** @var Warning[]|null $warnings */
     protected $Warnings;
+    /** @var array|null $Errors */
+    protected $Errors;
     // @codingStandardsIgnoreEnd
 
     /**
-     * @param string|null    $barcode
+     * @param string|null $barcode
      * @param Warning[]|null $warnings
+     * @param null $errors
      */
     public function __construct(
         $barcode = null,
-        $warnings = null
+        $warnings = null,
+        $errors = null
     ) {
         parent::__construct();
 
         $this->setBarcode($barcode);
         $this->setWarnings($warnings);
+        $this->setErrors($errors);
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getErrors()
+    {
+        return $this->Errors;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasErrors()
+    {
+        return count($this->getErrors()) > 0;
     }
 }

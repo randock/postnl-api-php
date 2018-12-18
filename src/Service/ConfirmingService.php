@@ -27,6 +27,7 @@
 namespace ThirtyBees\PostNL\Service;
 
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 use Sabre\Xml\Reader;
 use Sabre\Xml\Service as XmlService;
 use ThirtyBees\PostNL\Entity\AbstractEntity;
@@ -92,6 +93,7 @@ class ConfirmingService extends AbstractService
      */
     public function confirmShipmentREST(Confirming $confirming)
     {
+        /** @var Response $response */
         $response = $this->postnl->getHttpClient()->doRequest($this->buildConfirmRequestREST($confirming));
         $object = $this->processConfirmResponseREST($response);
 
@@ -103,7 +105,7 @@ class ConfirmingService extends AbstractService
             throw new ResponseException('Invalid API Response', null, null, $response);
         }
 
-        throw new ApiException('Unable to confirm');
+        throw new ApiException('Unable to confirm', $response->getStatusCode(), $this->getErrorBody($response));
     }
 
     /**
@@ -234,9 +236,9 @@ class ConfirmingService extends AbstractService
     {
         static::validateRESTResponse($response);
         $body = json_decode(static::getResponseText($response), true);
-        if (isset($body['ResponseShipments'])) {
+        if (isset($body['ConfirmingResponseShipments'])) {
             /** @var ConfirmingResponseShipment $object */
-            $object = AbstractEntity::jsonDeserialize(['ConfirmingResponseShipment' => $body['ResponseShipments'][0]]);
+            $object = AbstractEntity::jsonDeserialize(['ConfirmingResponseShipment' => $body['ResponseShipments']['ConfirmingResponseShipment']]);
             $this->setService($object);
 
             return $object;
@@ -317,6 +319,22 @@ class ConfirmingService extends AbstractService
         $this->setService($object);
 
         return $object;
+    }
+
+    /**
+     * @param Response $response
+     * @return array
+     * @throws ResponseException
+     */
+    private function getErrorBody(Response $response)
+    {
+        $errors = [];
+        $body = json_decode(static::getResponseText($response), true);
+        if (isset($body['Error'])) {
+            $errors = $body['Error'];
+        }
+
+        return $errors;
     }
 
 }
